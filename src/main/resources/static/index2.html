@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bank Site - v2 checkbox</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <script type="text/javascript" src="webjars/jquery/3.3.1/jquery.min.js"></script>
+    <script src='https://www.google.com/recaptcha/api.js'></script>
+</head>
+<body>
+<script>
+    var tokens = [];
+    var tokenCount;
+
+    function execute() {
+        tokenCount = tokenCount || 1;
+        grecaptcha.reset();
+        grecaptcha.execute();
+    }
+
+    function onResult(token) {
+         var now = Date.now();
+         $("#token").val(token);
+         $("#time").val(now);
+         tokens.push({value: token, time: now})
+         if (--tokenCount > 0) execute();
+    }
+
+    function submit() {
+        if (tokens.length == 0) return;
+        var token = tokens.pop();
+        var request = {
+            userName: $("#userName").val(),
+            password: $("#password").val()
+        };
+
+        $.ajax({
+            type: "POST",
+            contentType: 'application/json',
+            dataType: "json",
+            headers: {"captcha-response": token.value},
+            data: JSON.stringify(request),
+            url: "login",
+            success: function (data) {
+                alert(data.message);
+                $("#token").val(token.value);
+                $("#time").val(token.time);
+                // $("#submitTime").val(Date.now());
+                console.log("SUCCESS: " + (Date.now() - token.time));
+                setTimeout(submit, 5000);
+            },
+            error: function (data) {
+                alert("ERROR: " + data.responseText);
+                console.log("ERROR: " + (Date.now() - token.time));
+            }
+        });
+    };
+
+</script>
+
+<div>
+    <h1>Local Bank Login</h1>
+    <input type="text" id="userName" placeholder="userName" value="admin"/>
+    <input type="password" id="password" placeholder="password"/>
+    <input type="time" id="submitTime" disabled/>
+    <button type="submit"onclick="submit()">Login</button>
+    </br></br>
+    <textarea id="token" placeholder="token" rows="10" cols="50"></textarea>
+    <input type="time" id="time" disabled/>
+    <button type="button" onclick="execute()">Get Token</button>
+    <!--<div id="captchaResponse" style="width: 400px; overflow-wrap: break-word;"></div>-->
+    </br></br>
+    <!--<div class="g-recaptcha" data-sitekey="6LdUw7kUAAAAAOGXrQg3o3PK2M9Rl4wCYh7rKO8_"></div>-->
+    <div class="g-recaptcha" data-sitekey="6LeihbsUAAAAAGPv1_XV7J9nP4b7joMSw7Shyp63" data-size="invisible" data-callback="onResult"></div>
+   <!-- <div class="g-recaptcha" data-sitekey="6LdZPHUUAAAAABV1JDfHOheXKc621BVID6KbnbWh" data-size="invisible" data-callback="onResult"></div>-->
+</div>
+</body>
+</html>
