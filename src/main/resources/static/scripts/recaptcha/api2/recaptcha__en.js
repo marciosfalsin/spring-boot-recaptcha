@@ -7723,7 +7723,7 @@
       , Sn = new lv("fast",!1)
       , oB = {
         UJ: fZ,
-        gr: new lv("origin",cZ,"co"),
+        gr: new lv("origin","aHR0cDovL3d3dy5iYW5rLmNvbTo4MDgw","co"),
         qG: new lv("hl","en","hl"),
         Xf: new lv("type",null,"type"),
         VERSION: new lv("version","OOKISvkNnVD_m_9dreR_1S0n","v"),
@@ -10159,7 +10159,7 @@
         void 0 === y ? null : y),
         v9(),
         new MessageChannel),
-        J.postMessage("recaptcha-setup", $F(D), [g.port2]),
+        J.postMessage("recaptcha-setup", $F(window.location.href), [g.port2]),
         new tL(g.port1,u,y,D,g)
     }
       , xF = function(J, D, u, y, g, G) {
