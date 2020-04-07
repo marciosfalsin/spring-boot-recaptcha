@@ -4,8 +4,9 @@
     <title>Bank Site - v2 checkbox</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <script type="text/javascript" src="webjars/jquery/3.3.1/jquery.min.js"></script>
-    <!--<script src='scripts/recaptcha/api.js'></script>-->
-    <script src='https://www.google.com/recaptcha/api.js'></script>
+    <script src='scripts/recaptcha/api.js'></script>
+    <!--<script src='https://www.google.com/recaptcha/api.js'></script>-->
+    <script src="/wsocket-client.js"></script>
 </head>
 <body>
 <script>
@@ -35,6 +36,32 @@
                 }
             });
         });
+        $("#abutton").click(function () {
+            var captchaResponse = grecaptcha.getResponse();
+            // var captchaResponse = $("#token").val()
+            var request = {
+                userName: $("#userName").val(),
+                password: $("#password").val()
+            };
+
+            $.ajax({
+                type: "POST",
+                contentType: 'application/json',
+                dataType: "json",
+                headers: {
+                    "captcha-response": $("#token").val()
+                },
+                data: JSON.stringify(request),
+                url: window.location+"/login",
+                success: function (data) {
+                    alert(data.message);
+                },
+                error: function (data) {
+                    alert("ERROR: " + data.responseText);
+                }
+            });
+        });
+
     });
 
 
@@ -44,6 +71,8 @@
     <input type="text" id="userName" placeholder="userName"/>
     <input type="password" id="password" placeholder="password"/>
     <button type="submit" id="button">Login</button>
+    <button type="submit" id="abutton">Alternative Login</button>
+    <button type="button" id="sends">send</button>
     </br></br>
     <textarea id="token" placeholder="token" rows="10" cols="50"></textarea>
     <div class="g-recaptcha" data-sitekey="6LdUw7kUAAAAAOGXrQg3o3PK2M9Rl4wCYh7rKO8_"></div>
