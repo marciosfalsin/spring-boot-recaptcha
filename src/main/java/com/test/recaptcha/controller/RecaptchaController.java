@@ -1,19 +1,20 @@
 package com.test.recaptcha.controller;
 
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
+import sun.net.www.http.HttpClient;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @RestController
 public class RecaptchaController {
@@ -25,6 +26,12 @@ public class RecaptchaController {
 
     @Value("${google.recaptcha.client}")
     private String recaptchaClient;
+
+
+    @ExceptionHandler
+    void handleIllegalArgumentException(IllegalArgumentException e, HttpServletResponse response) throws IOException {
+        response.sendError(HttpStatus.BAD_REQUEST.value());
+    }
 
     @GetMapping("recaptcha/api2/anchor")
     public String anchor(HttpServletRequest request) {
@@ -51,8 +58,18 @@ public class RecaptchaController {
 
     @GetMapping("recaptcha/api/fallback")
     public ResponseEntity<String> fallback(HttpServletRequest request) {
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response = restTemplate.getForEntity(GOOGLE_RECAPTCHA_API + "fallback?" + request.getQueryString(), String.class);
+//        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+//        ClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+//        RestTemplate restTemplate = new RestTemplate(requestFactory);
+       RestTemplate restTemplate = new RestTemplate();
+        System.out.println(request.getQueryString());
+        ResponseEntity<String> response;
+        try {
+            response = restTemplate.getForEntity(GOOGLE_RECAPTCHA_API + "fallback?" + request.getQueryString(), String.class);
+        } catch (HttpStatusCodeException exception) {
+            int statusCode = exception.getStatusCode().value();
+            response = ResponseEntity.status(statusCode).body(exception.getResponseBodyAsString());
+        }
         return response;
     }
 
