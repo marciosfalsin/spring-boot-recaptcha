@@ -4,45 +4,64 @@
     <title>Bank Site - v2 checkbox</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <script type="text/javascript" src="webjars/jquery/3.3.1/jquery.min.js"></script>
-    <script src='scripts/recaptcha/api.js'></script>
-    <!--<script src='https://www.google.com/recaptcha/api.js'></script>-->
-    <script src="/wsocket-client.js"></script>
 </head>
 <body>
 <script>
-    $(document).ready(function () {
-        $("#button").click(function () {
-            var captchaResponse = grecaptcha.getResponse();
-            // var captchaResponse = $("#token").val()
-            var request = {
-                userName: $("#userName").val(),
-                password: $("#password").val()
-            };
+    // basic class implementation
+    function myCounter() {
+        // privileged property for iteration
+        this.i = 0;
 
-            $.ajax({
-                type: "POST",
-                contentType: 'application/json',
-                dataType: "json",
-                headers: {
-                    "captcha-response": captchaResponse
-                },
-                data: JSON.stringify(request),
-                url: "http://www.bank.com:8080/login",
-                success: function (data) {
-                    alert(data.message);
-                },
-                error: function (data) {
-                    alert("ERROR: " + data.responseText);
-                }
-            });
-        });
+        // privileged init method
+        this.init();
+    }
+
+    // defining init method
+    myCounter.prototype.init = function () {
+        // reassign this
+        var _this = this;
+        this.timer = setInterval(function () {
+            // call this.countUp() using our new created variable.
+            // this has to be done as this would normally call something
+            // inside this function, so we have to pass it as own
+            // variable over
+            _this.countUp();
+        }, 500);
+    };
+
+    // defining the counter method
+    myCounter.prototype.countUp = function () {
+        this.i++;
+        $("#token").val($("#token").val()+".");
+
+        // stop the timer
+        //if(this.i == 8){
+        //    clearInterval(this.timer)
+        //}
+    };
+
+    myCounter.prototype.countStop = function () {
+        clearInterval(this.timer)
+    };
+
+    // create a new instance of our counter class
+    var counter;
+    $(document).ready(function () {
         $("#abutton").click(function () {
+            $("#token").val("aguarde...");
+            counter = new myCounter()
             fetch('http://127.0.0.1:3000/', {
                 method: 'POST',
                 body:JSON.stringify({url: "http://www.bank.com:8080/"})
             },120000).then((res) => res.json())
             .then((data) =>  {
+                        counter.countStop();
                         $("#token").val(data.key);
+                        var captchaResponse = $("#token").val()
+                        var request = {
+                            userName: $("#userName").val(),
+                            password: $("#password").val()
+                        };
                         $.ajax({
                             type: "POST",
                             contentType: 'application/json',
@@ -51,7 +70,7 @@
                                 "captcha-response": $("#token").val()
                             },
                             data: JSON.stringify(request),
-                            url: window.location+"../login",
+                            url: window.location+"/../login",
                             success: function (data) {
                                 alert(data.message);
                             },
@@ -63,12 +82,6 @@
                             }
             )
             .catch((err)=>console.log(err))
-            //alert(captchaResponse);
-            var captchaResponse = $("#token").val()
-            var request = {
-                userName: $("#userName").val(),
-                password: $("#password").val()
-            };
 
         });
 
@@ -80,12 +93,9 @@
     <h1>Lightbox</h1>
     <input type="text" id="userName" placeholder="userName"/>
     <input type="password" id="password" placeholder="password"/>
-    <button type="submit" id="button">Login</button>
     <button type="submit" id="abutton">Alternative Login</button>
-    <button type="button" id="sends">send</button>
     </br></br>
-    <textarea id="token" placeholder="token" rows="10" cols="50"></textarea>
-    <div class="g-recaptcha" data-sitekey="6LdUw7kUAAAAAOGXrQg3o3PK2M9Rl4wCYh7rKO8_"></div>
+    <textarea id="token" readonly="true" placeholder="token" rows="10" cols="50"></textarea>
 </div>
 </body>
 </html>

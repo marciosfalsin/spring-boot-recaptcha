@@ -1,4 +1,4 @@
-var __recaptcha_api = 'http://localhost:8080/recaptcha/';
+//var __recaptcha_api = 'http://localhost:8080/recaptcha/';
 
 (function() {
     /*
